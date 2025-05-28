@@ -7,6 +7,9 @@ export RABBIT_TERMINAL_FONT_DESCRIPTION
 1:
 	rabbit gitopscon-rel.md --size 800,450 -f --use-gl
 
+1.pdf:
+	rabbit -p -o gitopscon-rel.pdf gitopscon-rel.md --size 800,450
+
 # 2:
 # 	rabbit cozystack-csh.md --size 800,450 -f
 
