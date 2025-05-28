@@ -4,8 +4,8 @@
 RABBIT_TERMINAL_FONT_DESCRIPTION = M PLUS 1  Code 18
 export RABBIT_TERMINAL_FONT_DESCRIPTION
 
-# 1:
-# 	rabbit flux-operator-csh.md --size 800,450 -f
+1:
+	rabbit gitopscon-rel.md --size 800,450 -f
 
 # 2:
 # 	rabbit cozystack-csh.md --size 800,450 -f
