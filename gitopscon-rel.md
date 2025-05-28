@@ -392,15 +392,68 @@ azure devops...
 ```mermaid
 flowchart LR
 
-G(Git Host)
+I(Image Host)
 R((Receiver))
 A(ImageRepository)
 B(ImagePolicy)
 C(ImageUpdateAutomation)
-G --> R --> A --> B --> C
+I --> R --> A --> B --> C
 ```
 
 # Subscription
+
+```mermaid
+flowchart LR
+
+U(Developer Push App)
+G(Git Host)
+C(CI Workflow
+Build Image)
+I(Image Host)
+R1((Receiver))
+O1(...)
+O2(...)
+A(ImageRepository)
+B(ImagePolicy)
+IUA(ImageUpdateAutomation)
+GG(Git Host again)
+U --> G --> C --> I --> R1 --> O1
+O2 --> A --> B --> IUA --> GG
+```
+
+# Subscription
+
+```mermaid
+flowchart LR
+
+IUA(ImageUpdateAutomation)
+GG(Git Host)
+R((Receiver))
+G(GitRepository)
+K(Kustomization)
+A(Apply to Kubernetes)
+
+IUA --> GG --> R --> G --> K --> A
+```
+
+# Subscription
+
+```mermaid
+flowchart LR
+
+IUA(ImageUpdateAutomation)
+GG(Git Host)
+R((Receiver))
+G(GitRepository)
+K(Kustomization)
+H(HelmRelease)
+A(Apply to Kubernetes)
+O(...)
+C(HelmChart)
+
+IUA --> GG --> R --> G --> K --> H --> A
+O --> C --> H
+```
 
 # Watchers
 
@@ -440,10 +493,14 @@ or `Generic+HMAC` type for better security
 
 # Watchers
 
-1. Connects to outside (`GitRepos`, ...)
-2. {::wait/}Connects to another Flux resource
+*Two* primary Flux types
 
-* {::wait/}These can be automatically subscribed
+1. Source: Connects to outside (Git, ...)
+2. {::wait/}Applier: Refers to another Flux resource (upstream) and applies sth. to the cluster
+
+*Sources* and *Appliers* transact via *Artifacts*
+
+* {::wait/}Appliers can be automatically subscribed to their source, supported by Kubernetes
 
 # Watchers
 
@@ -454,7 +511,7 @@ or `Generic+HMAC` type for better security
 # Third kind
 
 * Resources with no reconciler
-(`Alert`, formerly `ImagePolicy`)
+(`Alert`, `ImagePolicy`, ...)
 
 * {::wait/}Roadmap shout out: Flux 2.6 adds
 long-awaited digest hash pinning
@@ -465,9 +522,10 @@ so you can use `:latest` in `ImageUpdateAutomation`!
 
 # Third kind
 
-* {::wait/}(so now `ImagePolicy` will have a reconciler!)
+* {::wait/}(so now `ImagePolicy` *will have* a reconciler!)
 * {::wait/}`Alert` is not reconciled
-* {::wait/}Most Flux resources are reconciled
+* {::wait/}Most Flux resources *are* reconciled
+* {::wait/}All reconcilers have a *sync interval*
 
 # Question
 
@@ -572,7 +630,7 @@ flux-system   team-a        60m   True
 * `Receiver` Secret might not match!
 * Webhook might not be configured at all
 * Config can be deleted
-* {::wait/}Protip: build Receivers & their secrets *using IaC* like Terraform, Pulumi, Crossplane for repeatable experience
+* {::wait/}Protip: build Receivers and Webhooks *using IaC* like Terraform, Pulumi, Crossplane for repeatable experience
 
 # What can go wrong?
 
@@ -598,7 +656,7 @@ even with correctly configured Receiver
 
 # How to detect config-related failure
 
-Probe `Receiver` endpoint periodically
+POST to Probe `Receiver` endpoint periodically with a synthetic payload
 
 * {::wait/}*Wait a second* isn't that just polling with way more steps? *Yeah...* it is that.
 * Probably don't need to monitor this, your devs will let you know it's broken
@@ -632,13 +690,13 @@ Probe `Receiver` endpoint periodically
 # What can go wrong? Notifications
 
 * Monitor logs to detect when notifications are failing to fire
-* {::wait/}If your notifications are down, how do you get notified about that?
+* {::wait/}If your notifications are down, *how* do you get notified about that?
 * {::wait/}*Curate and use a secondary system*
 * {::wait/}CloudWatch alerts don't flow through Flux
 
 # What can go wrong? Notifications
 
-* I'm using *EKS Auto Mode*, it deletes my nodes every day & Flux spews errors, rendering alerts significantly *less useful*
+* I'm using *EKS Auto Mode*, it deletes my nodes every day & then Flux spews errors, rendering alerts significantly *less useful*
 * How do I get Flux Alerts that are *actually useful*, not noisy?
 * {::wait/}That is tough, not enough time today
 
@@ -648,7 +706,7 @@ Probe `Receiver` endpoint periodically
   *Monitor those events too*
 * You can even route them through Flux Alerts, but this is *advanced wizardry*
 * {::wait/}I built *`flux-event-relay`* to send *Karpenter* `NodeClaim` events to Flux
-* {::wait/}Work product, work for hire (not published)
+* {::wait/}My *work for hire* (not published as of yet)
 but if enough people ask me about it I will
 
 # Thanks
